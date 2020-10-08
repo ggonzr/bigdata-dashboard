@@ -21,12 +21,11 @@ import React, { Component } from "react";
 import ChartistGraph from "react-chartist";
 import { Grid, Row, Col, Table } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
-import {
-  dataPie,
-  legendPie,
+import {    
   optionsBar,
   responsiveBar,
 } from "variables/Variables.jsx";
+import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox";
 
 class RF2 extends Component {
   //Variables estaticas
@@ -47,7 +46,10 @@ class RF2 extends Component {
 
   constructor(props) {
     super(props);
+    this.addRemoveDay = this.addRemoveDay.bind(this);
     this.state = {
+      form_validated: false,
+      dias: [],
       consultas_realizadas: 0,
       dataBar: {
         labels: ["Consulta #1"],
@@ -56,14 +58,34 @@ class RF2 extends Component {
       table_data: [
         {
           consulta: 1,
-          data: [["1", "Amarillo", "$36,738", "Hoy", "Chapinero", "Colina Campestre", "$12.75"]],
+          data: [
+            [
+              "1",
+              "Amarillo",
+              "$36,738",
+              "Hoy",
+              "Chapinero",
+              "Colina Campestre",
+              "$12.75",
+            ],
+          ],
         },
         {
           consulta: 2,
-          data: [[2, "Verde", "$36,738", "Hoy", "Bellavista", "La Riviera", "$12.75"]],
+          data: [
+            [
+              2,
+              "Verde",
+              "$36,738",
+              "Hoy",
+              "Bellavista",
+              "La Riviera",
+              "$12.75",
+            ],
+          ],
         },
-      ],
-    };
+      ],      
+    };    
   }
 
   /**
@@ -183,12 +205,45 @@ class RF2 extends Component {
   }
 
   /**
+   * Permite añadir o remover un dia para los parametros segun el checkbox
+   * @param {*} number Numero del dia de la semana 1 como Domingo 7 como Sabado
+   * @param {*} add True si se desea agregar el numero, false para eliminarlo
+   */
+  addRemoveDay(number, add) {
+    console.log("Numero agregandose", number);
+    console.log("Estado", add);
+
+    const { dias } = this.state;
+    if (add) {
+      dias.push(number);
+      this.setState({
+        ...this.state,
+        dias: dias
+      })
+    }
+    else {
+      dias.filter((val) => val !== number);
+      this.setState({
+        ...this.state,
+        dias: dias
+      })
+    }
+  }
+
+  /**
+   * Determina si el formulario del panel de control es correcto
+   */
+  handleSubmit() {
+
+  }
+
+  /**
    * Renderiza cada una de las tablas con los resultado
    * @param {*} table_data Objeto con el numero de consulta y las filas
    */
-  renderTable(table_data) {
+  renderTable(table_data, key) {
     return (
-      <Col md={12}>
+      <Col key={key} md={12}>
         <Card
           title={`Resultados de la consulta #${table_data.consulta}`}
           category="Valores minimo, maximo y promedio para cada tipo de taxi"
@@ -221,57 +276,135 @@ class RF2 extends Component {
     );
   }
 
+  /**
+   * Permite renderizar el grafico de barras de la aplicacion
+   */
+  renderBarGraph() {
+    return (
+      <Col md={8}>
+        <Card
+          id="rf2Times"
+          title="Requerimiento Funcional #2"
+          category="Valores minimo, maximo y promedio de viajes en una zona determinada"
+          stats="Tiempos de respuesta de la consulta"
+          statsIcon="fa fa-check"
+          content={
+            <div className="ct-chart">
+              <ChartistGraph
+                data={this.state.dataBar}
+                type="Bar"
+                options={optionsBar}
+                responsiveOptions={responsiveBar}
+              />
+            </div>
+          }
+          legend={
+            <div className="legend">{this.createLegend(this.legendBar)}</div>
+          }
+        />
+      </Col>
+    );
+  }
+
+  /**
+   * Permite renderizar el panel de control de la aplicacion
+   */
+  renderControlPanel() {
+    return (
+      <Col md={4}>
+        <Card        
+          statsIcon="fa fa-cog"
+          title="Panel de control"
+          category="Seleccion de parametros"
+          stats="Requerimiento funcional #2"
+          content={     
+            <div className="content">
+              <label>Seleccion de dias</label>
+              <Grid fluid>
+                {/* Seccion de Checkboxes */}                
+                <Row>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={1}
+                      label={"Domingo"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={2}
+                      label={"Lunes"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={3}
+                      label={"Martes"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={4}
+                      label={"Miercoles"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={5}
+                      label={"Jueves"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={6}
+                      label={"Viernes"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <CustomCheckbox
+                      number={7}
+                      label={"Sabado"}
+                      addNumber={this.addRemoveDay}
+                    />
+                  </Col>
+                </Row>
+                {/* Seccion de Textfields   
+                <Form noValidate validated={this.state.form_validated} onSubmit={this.handleSubmit}>
+                  <Form.Row>
+                    <FormGroup as={Col} md="4" controlId="validationCustom01">
+                      <Form.Label>Zona de Salida</Form.Label>
+                      <Form.Control
+                        required
+                        type="number"
+                        placeholder="74"                        
+                      />
+                    </Form.Group>                    
+                  </Form.Row>
+                </Form>
+                */}
+              </Grid>
+            </div>
+          }          
+        />
+      </Col>
+    );
+  }
+
   render() {
     return (
       <div className="content">
         <Grid fluid>
           <Row>
-            <Col md={8}>
-              <Card
-                id="rf2Times"
-                title="Requerimiento Funcional #2"
-                category="Valores minimo, maximo y promedio de viajes en una zona determinada"
-                stats="Tiempos de respuesta de la consulta"
-                statsIcon="fa fa-check"
-                content={
-                  <div className="ct-chart">
-                    <ChartistGraph
-                      data={this.state.dataBar}
-                      type="Bar"
-                      options={optionsBar}
-                      responsiveOptions={responsiveBar}
-                    />
-                  </div>
-                }
-                legend={
-                  <div className="legend">
-                    {this.createLegend(this.legendBar)}
-                  </div>
-                }
-              />
-            </Col>
-            <Col md={4}>
-              <Card
-                statsIcon="fa fa-clock-o"
-                title="Email Statistics"
-                category="Last Campaign Performance"
-                stats="Campaign sent 2 days ago"
-                content={
-                  <div
-                    id="chartPreferences"
-                    className="ct-chart ct-perfect-fourth"
-                  >
-                    <ChartistGraph data={dataPie} type="Pie" />
-                  </div>
-                }
-                legend={
-                  <div className="legend">{this.createLegend(legendPie)}</div>
-                }
-              />
-            </Col>
+            {this.renderBarGraph()}
+            {this.renderControlPanel()}
           </Row>
           <Row>
-            {this.state.table_data.map(table => this.renderTable(table))}
+            {this.state.table_data.map((table, key) => this.renderTable(table, key))}
           </Row>
         </Grid>
       </div>
