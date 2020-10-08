@@ -20,35 +20,56 @@
 import React, { Component } from "react";
 import ChartistGraph from "react-chartist";
 import { Grid, Row, Col, Table } from "react-bootstrap";
-import { thArray, tdArray } from "variables/Variables.jsx";
 import { Card } from "components/Card/Card.jsx";
 import {
   dataPie,
-  legendPie, 
+  legendPie,
   optionsBar,
-  responsiveBar,  
+  responsiveBar,
 } from "variables/Variables.jsx";
 
 class RF2 extends Component {
+  //Variables estaticas
+  legendBar = {
+    names: ["Minimo", "Promedio", "Maximo"],
+    types: ["info", "danger", "warning"],
+  };
+
+  table_head = [
+    "ID",
+    "Tipo",
+    "Total",
+    "Fecha",
+    "Zona de Ida",
+    "Zona de Llegada",
+    "Promedio",
+  ];
+
   constructor(props) {
     super(props);
     this.state = {
       consultas_realizadas: 0,
       dataBar: {
         labels: ["Consulta #1"],
-        series: [["1"], ["3"], ["5"]]
+        series: [["1"], ["3"], ["5"]],
       },
-      legendBar: {
-        names: ["Minimo", "Promedio", "Maximo"],
-        types: ["info", "danger", "warning"]
-      }
-    }
+      table_data: [
+        {
+          consulta: 1,
+          data: [["1", "Amarillo", "$36,738", "Hoy", "Chapinero", "Colina Campestre", "$12.75"]],
+        },
+        {
+          consulta: 2,
+          data: [[2, "Verde", "$36,738", "Hoy", "Bellavista", "La Riviera", "$12.75"]],
+        },
+      ],
+    };
   }
 
   /**
    * Permite crear la leyenda del grafico de barras
    * @param {*} legendBar Objeto con la informacion de la legenda del grafico de barras
-   *            Se utiliza el que se declara en el state 
+   *            Se utiliza el que se declara en el state
    */
   createLegend(legendBar) {
     var legend = [];
@@ -67,42 +88,146 @@ class RF2 extends Component {
    *            consultas_realizadas: Numero de consultas agregadas, tuplas en la grafica
    *            dataBar: Objetos con los datos del grafico
    *            consulta: Resultados de la consulta, Response
-   */           
-  addChartData({consultas_realizadas, dataBar}, consulta) {
+   */
+  addChartData({ consultas_realizadas, dataBar }, consulta) {
     //Amarillo
     dataBar.labels.push(`Consulta #${consultas_realizadas} - Amarillo`);
     //Valor minimo
-    dataBar.series[0].push(consulta.minAmarillo.split(";")[0])
+    dataBar.series[0].push(consulta.minAmarillo.split(";")[0]);
     //Valor promedio
-    dataBar.series[1].push(consulta.meanAmarillo)
+    dataBar.series[1].push(consulta.meanAmarillo);
     //Valor maximo
-    dataBar.series[2].push(consulta.maxAmarillo.split(";")[0])
+    dataBar.series[2].push(consulta.maxAmarillo.split(";")[0]);
 
     //Verde
     dataBar.labels.push(`Consulta #${consultas_realizadas} - Verde`);
     //Valor minimo
-    dataBar.series[0].push(consulta.minVerde.split(";")[0])
+    dataBar.series[0].push(consulta.minVerde.split(";")[0]);
     //Valor promedio
-    dataBar.series[1].push(consulta.meanVerde)
+    dataBar.series[1].push(consulta.meanVerde);
     //Valor maximo
-    dataBar.series[2].push(consulta.maxVerde.split(";")[0])
+    dataBar.series[2].push(consulta.maxVerde.split(";")[0]);
 
     //Actualizar el estado e incrementar el contador
     consultas_realizadas++;
     this.setState({
       ...this.state,
       consultas_realizadas: consultas_realizadas,
-      dataBar: dataBar
+      dataBar: dataBar,
     });
+  }
+
+  /**
+   * Permite añadir un resultado para que sea renderizado a forma de tabla
+   * @param {*} consulta Response de la consulta
+   * @param {*} consultas_realizadas Numero de consultas realizadas, des-estructurada del objeto state
+   */
+  addResultTable({ consultas_realizadas, table_data }, consulta) {
+    let filas = [];
+    let data = consulta.minAmarillo.split(";");
+    //Minimo amarillo
+    filas.push([
+      1,
+      "Minimo Amarillo",
+      data[0],
+      data[1],
+      data[2],
+      data[3],
+      consulta.meanAmarillo,
+    ]);
+    //Maximo amarillo
+    data = consulta.maxAmarillo.split(";");
+    filas.push([
+      2,
+      "Maximo Amarillo",
+      data[0],
+      data[1],
+      data[2],
+      data[3],
+      consulta.meanAmarillo,
+    ]);
+    //Minimo Verde
+    data = consulta.minVerde.split(";");
+    filas.push([
+      3,
+      "Maximo Amarillo",
+      data[0],
+      data[1],
+      data[2],
+      data[3],
+      consulta.meanVerde,
+    ]);
+    //Maximo Verde
+    data = consulta.maxVerde.split(";");
+    filas.push([
+      4,
+      "Maximo Amarillo",
+      data[0],
+      data[1],
+      data[2],
+      data[3],
+      consulta.meanVerde,
+    ]);
+
+    //Actualizar las tablas
+    table_data.push({
+      consulta: consultas_realizadas,
+      data: filas,
+    });
+
+    //Actualizar el estado
+    this.setState({
+      ...this.state,
+      table_data: table_data,
+    });
+  }
+
+  /**
+   * Renderiza cada una de las tablas con los resultado
+   * @param {*} table_data Objeto con el numero de consulta y las filas
+   */
+  renderTable(table_data) {
+    return (
+      <Col md={12}>
+        <Card
+          title={`Resultados de la consulta #${table_data.consulta}`}
+          category="Valores minimo, maximo y promedio para cada tipo de taxi"
+          ctTableFullWidth
+          ctTableResponsive
+          content={
+            <Table striped hover>
+              <thead>
+                <tr>
+                  {this.table_head.map((prop, key) => {
+                    return <th key={key}>{prop}</th>;
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {table_data.data.map((prop, key) => {
+                  return (
+                    <tr key={key}>
+                      {prop.map((prop, key) => {
+                        return <td key={key}>{prop}</td>;
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          }
+        />
+      </Col>
+    );
   }
 
   render() {
     return (
       <div className="content">
-        <Grid fluid>          
+        <Grid fluid>
           <Row>
-          <Col md={8}>
-            <Card
+            <Col md={8}>
+              <Card
                 id="rf2Times"
                 title="Requerimiento Funcional #2"
                 category="Valores minimo, maximo y promedio de viajes en una zona determinada"
@@ -119,10 +244,12 @@ class RF2 extends Component {
                   </div>
                 }
                 legend={
-                  <div className="legend">{this.createLegend(this.state.legendBar)}</div>
+                  <div className="legend">
+                    {this.createLegend(this.legendBar)}
+                  </div>
                 }
               />
-            </Col>          
+            </Col>
             <Col md={4}>
               <Card
                 statsIcon="fa fa-clock-o"
@@ -143,37 +270,8 @@ class RF2 extends Component {
               />
             </Col>
           </Row>
-          <Row>                      
-            <Col md={12}>
-              <Card
-                title="Resultados de la consulta"
-                category="Valores minimo, maximo y promedio para cada tipo de taxi"
-                ctTableFullWidth
-                ctTableResponsive
-                content={
-                  <Table striped hover>
-                    <thead>
-                      <tr>
-                        {thArray.map((prop, key) => {
-                          return <th key={key}>{prop}</th>;
-                        })}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tdArray.map((prop, key) => {
-                        return (
-                          <tr key={key}>
-                            {prop.map((prop, key) => {
-                              return <td key={key}>{prop}</td>;
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                }
-              />
-            </Col>            
+          <Row>
+            {this.state.table_data.map(table => this.renderTable(table))}
           </Row>
         </Grid>
       </div>
