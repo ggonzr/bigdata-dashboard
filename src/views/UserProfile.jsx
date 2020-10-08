@@ -98,7 +98,7 @@ class UserProfile extends Component {
             </Col>
             <Col md={4}>
               <UserCard
-                bgImage="https://ununsplash.imgix.net/photo-1431578500526-4d9613015464?fit=crop&fm=jpg&h=300&q=75&w=400"
+                bgImage="https://upload.wikimedia.org/wikipedia/commons/4/4b/Desfile_Portela_2014_%28906185%29.jpg"
                 avatar={alex}
                 name="Alex Romero"
                 userName="aromero45"

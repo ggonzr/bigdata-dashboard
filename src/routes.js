@@ -20,6 +20,7 @@ import UserProfile from "views/UserProfile.jsx";
 import TableList from "views/TableList.jsx";
 import Maps from "views/Maps.jsx";
 import Notifications from "views/Notifications.jsx";
+import RF2 from "views/RF2.jsx";
 
 const dashboardRoutes = [
   {
@@ -27,6 +28,13 @@ const dashboardRoutes = [
     name: "Dashboard",
     icon: "pe-7s-graph",
     component: Dashboard,
+    layout: "/admin"
+  },  
+  {
+    path: "/rf2",
+    name: "Req. Funcional 2",
+    icon: "pe-7s-graph3",    
+    component: RF2,
     layout: "/admin"
   },  
   {
