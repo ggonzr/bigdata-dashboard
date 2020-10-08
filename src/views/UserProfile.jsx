@@ -19,165 +19,112 @@ import React, { Component } from "react";
 import {
   Grid,
   Row,
-  Col,
-  FormGroup,
-  ControlLabel,
-  FormControl
+  Col,  
 } from "react-bootstrap";
 
-import { Card } from "components/Card/Card.jsx";
-import { FormInputs } from "components/FormInputs/FormInputs.jsx";
 import { UserCard } from "components/UserCard/UserCard.jsx";
 import Button from "components/CustomButton/CustomButton.jsx";
-
-import avatar from "assets/img/faces/face-3.jpg";
+import geovanny from "assets/img/faces/geovanny.jpg";
+import cesar from "assets/img/faces/cesar.jpg";
+import alex from "assets/img/faces/alex.jpg";
 
 class UserProfile extends Component {
   render() {
     return (
       <div className="content">
         <Grid fluid>
-          <Row>
-            <Col md={8}>
-              <Card
-                title="Edit Profile"
-                content={
-                  <form>
-                    <FormInputs
-                      ncols={["col-md-5", "col-md-3", "col-md-4"]}
-                      properties={[
-                        {
-                          label: "Company (disabled)",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "Company",
-                          defaultValue: "Creative Code Inc.",
-                          disabled: true
-                        },
-                        {
-                          label: "Username",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "Username",
-                          defaultValue: "michael23"
-                        },
-                        {
-                          label: "Email address",
-                          type: "email",
-                          bsClass: "form-control",
-                          placeholder: "Email"
-                        }
-                      ]}
-                    />
-                    <FormInputs
-                      ncols={["col-md-6", "col-md-6"]}
-                      properties={[
-                        {
-                          label: "First name",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "First name",
-                          defaultValue: "Mike"
-                        },
-                        {
-                          label: "Last name",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "Last name",
-                          defaultValue: "Andrew"
-                        }
-                      ]}
-                    />
-                    <FormInputs
-                      ncols={["col-md-12"]}
-                      properties={[
-                        {
-                          label: "Adress",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "Home Adress",
-                          defaultValue:
-                            "Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                        }
-                      ]}
-                    />
-                    <FormInputs
-                      ncols={["col-md-4", "col-md-4", "col-md-4"]}
-                      properties={[
-                        {
-                          label: "City",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "City",
-                          defaultValue: "Mike"
-                        },
-                        {
-                          label: "Country",
-                          type: "text",
-                          bsClass: "form-control",
-                          placeholder: "Country",
-                          defaultValue: "Andrew"
-                        },
-                        {
-                          label: "Postal Code",
-                          type: "number",
-                          bsClass: "form-control",
-                          placeholder: "ZIP Code"
-                        }
-                      ]}
-                    />
-
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup controlId="formControlsTextarea">
-                          <ControlLabel>About Me</ControlLabel>
-                          <FormControl
-                            rows="5"
-                            componentClass="textarea"
-                            bsClass="form-control"
-                            placeholder="Here can be your description"
-                            defaultValue="Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo."
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Button bsStyle="info" pullRight fill type="submit">
-                      Update Profile
-                    </Button>
-                    <div className="clearfix" />
-                  </form>
-                }
-              />
-            </Col>
+          <Row>            
             <Col md={4}>
               <UserCard
-                bgImage="https://ununsplash.imgix.net/photo-1431578500526-4d9613015464?fit=crop&fm=jpg&h=300&q=75&w=400"
-                avatar={avatar}
-                name="Mike Andrew"
-                userName="michael24"
+                bgImage="https://cdn.aarp.net/content/dam/aarp/travel/international/2017-02/1140-1-ss-caribbean-aruba-esp.imgcache.revefbd5e33d000607a94cca359ee9ee2dd.web.900.513.jpg"
+                avatar={geovanny}
+                name="Geovanny González"
+                userName="ggonzr"
                 description={
                   <span>
-                    "Lamborghini Mercy
-                    <br />
-                    Your chick she so thirsty
-                    <br />
-                    I'm in that two seat Lambo"
+                    <p/>
+                    <p/>
+                    Estudiante de último semestre de Ingeniería de Sistemas y Computación en la Universidad de los Andes. 
+                    Me llama mucho la atención los temas relacionados con el análisis de información para la toma de decisiones en las organizaciones,
+                    así como la manipulación de grandes cantidades de información para construir soluciones de aprendizaje automático. 
                   </span>
                 }
                 socials={
                   <div>
                     <Button simple>
-                      <i className="fa fa-facebook-square" />
+                      <a href="https://www.linkedin.com/in/ggonzr/" target="__blank">
+                        <i className="fa fa-linkedin-square" />
+                      </a>
                     </Button>
                     <Button simple>
-                      <i className="fa fa-twitter" />
-                    </Button>
-                    <Button simple>
-                      <i className="fa fa-google-plus-square" />
-                    </Button>
+                      <a href="https://github.com/ggonzr" target="__blank">
+                      <i className="fa fa-github" />
+                      </a>
+                    </Button>                    
                   </div>
                 }
-              />
+              />              
+            </Col>
+            <Col md={4}>
+              <UserCard
+                bgImage="https://ununsplash.imgix.net/photo-1431578500526-4d9613015464?fit=crop&fm=jpg&h=300&q=75&w=400"
+                avatar={cesar}
+                name="Cesar Vega"
+                userName="CesarAVegaF-UNIANDES"
+                description={
+                  <span>
+                    <p/>
+                    <p/>
+                    Hola, soy ingeniero graduado de la Escuela Colombiana de Ingeniería Julio Garavito del programa de Ingeniería De Sistemas 
+                    y con estudios en Ingeniería Electrónica, con experiencia en el uso de sistemas y dispositivos programables con enfoque a 
+                    robótica móvil; uso de Redes Neuronales Artificiales para clasificación de la cual cuento con una publicación académica.                     
+                  </span>
+                }
+                socials={
+                  <div>
+                    <Button simple>
+                      <a href="https://www.linkedin.com/" target="__blank">
+                        <i className="fa fa-linkedin-square" />
+                      </a>
+                    </Button>
+                    <Button simple>
+                      <a href="https://github.com/CesarAVegaF-UNIANDES" target="__blank">
+                      <i className="fa fa-github" />
+                      </a>
+                    </Button>                    
+                  </div>
+                }
+              />              
+            </Col>
+            <Col md={4}>
+              <UserCard
+                bgImage="https://ununsplash.imgix.net/photo-1431578500526-4d9613015464?fit=crop&fm=jpg&h=300&q=75&w=400"
+                avatar={alex}
+                name="Alex Romero"
+                userName="aromero45"
+                description={
+                  <span>
+                    <p/>
+                    <p/>
+                    Soy Ingeniero Mecatrónico graduado desde el 2009, tengo 34 años y trabajo para una multinacional llamada Schwind Latin S.A
+                    en equipos médicos y software orientado a telemedicina.
+                  </span>
+                }
+                socials={
+                  <div>
+                    <Button simple>
+                      <a href="https://www.linkedin.com/" target="__blank">
+                        <i className="fa fa-linkedin-square" />
+                      </a>
+                    </Button>
+                    <Button simple>
+                      <a href="https://github.com/aromero45" target="__blank">
+                      <i className="fa fa-github" />
+                      </a>
+                    </Button>                    
+                  </div>
+                }
+              />              
             </Col>
           </Row>
         </Grid>

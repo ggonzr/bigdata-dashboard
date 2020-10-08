@@ -22,7 +22,7 @@ export class UserCard extends Component {
     return (
       <div className="card card-user">
         <div className="image">
-          <img src={this.props.bgImage} alt="..." />
+          <img src={this.props.bgImage} alt="fondo integrante" />
         </div>
         <div className="content">
           <div className="author">
@@ -30,7 +30,7 @@ export class UserCard extends Component {
               <img
                 className="avatar border-gray"
                 src={this.props.avatar}
-                alt="..."
+                alt="foto integrante"
               />
               <h4 className="title">
                 {this.props.name}
@@ -39,7 +39,7 @@ export class UserCard extends Component {
               </h4>
             </a>
           </div>
-          <p className="description text-center">{this.props.description}</p>
+          <p className="description text-left">{this.props.description}</p>
         </div>
         <hr />
         <div className="text-center">{this.props.socials}</div>
