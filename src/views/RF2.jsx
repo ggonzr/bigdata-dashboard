@@ -19,12 +19,21 @@
 */
 import React, { Component } from "react";
 import ChartistGraph from "react-chartist";
-import { Grid, Row, Col, Table } from "react-bootstrap";
+import {
+  Grid,
+  Row,
+  Col,
+  Table,
+  FormControl,
+  FormGroup,
+  ControlLabel,
+  HelpBlock,
+  MenuItem,
+  DropdownButton,
+  Button
+} from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
-import {    
-  optionsBar,
-  responsiveBar,
-} from "variables/Variables.jsx";
+import { optionsBar, responsiveBar } from "variables/Variables.jsx";
 import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox";
 
 class RF2 extends Component {
@@ -84,8 +93,8 @@ class RF2 extends Component {
             ],
           ],
         },
-      ],      
-    };    
+      ],
+    };
   }
 
   /**
@@ -210,31 +219,49 @@ class RF2 extends Component {
    * @param {*} add True si se desea agregar el numero, false para eliminarlo
    */
   addRemoveDay(number, add) {
-    console.log("Numero agregandose", number);
-    console.log("Estado", add);
-
     const { dias } = this.state;
     if (add) {
       dias.push(number);
       this.setState({
         ...this.state,
-        dias: dias
-      })
-    }
-    else {
+        dias: dias,
+      });
+    } else {
       dias.filter((val) => val !== number);
       this.setState({
         ...this.state,
-        dias: dias
-      })
+        dias: dias,
+      });
     }
   }
 
   /**
-   * Determina si el formulario del panel de control es correcto
+   * Permite validar el Form
    */
-  handleSubmit() {
+  getValidationState() {
+    if (!this.state.zona_salida || !this.state.zona_llegada) {
+      return null;
+    } else if (
+      this.state.zona_salida > 0 &&
+      this.state.zona_salida < 264 &&
+      this.state.zona_llegada > 0 &&
+      this.state.zona_llegada < 264
+    ) {
+      return "success";
+    } else {
+      return "error";
+    }
+  }
 
+  /**
+   * Agregar mes de consulta
+   * @param {*} month Mes de consulta
+   */
+  addMonth(month) {
+    this.setState({
+      ...this.state,
+      month: month,
+    });
   }
 
   /**
@@ -307,21 +334,30 @@ class RF2 extends Component {
   }
 
   /**
+   * Crear consulta
+   */
+  
+  submitQuery(ev) {
+    ev.preventDefault();
+    console.log("Consulta")
+  }
+
+  /**
    * Permite renderizar el panel de control de la aplicacion
    */
   renderControlPanel() {
     return (
       <Col md={4}>
-        <Card        
+        <Card
           statsIcon="fa fa-cog"
           title="Panel de control"
           category="Seleccion de parametros"
           stats="Requerimiento funcional #2"
-          content={     
+          content={
             <div className="content">
               <label>Seleccion de dias</label>
               <Grid fluid>
-                {/* Seccion de Checkboxes */}                
+                {/* Seccion de Checkboxes */}
                 <Row>
                   <Col md={4}>
                     <CustomCheckbox
@@ -373,23 +409,109 @@ class RF2 extends Component {
                     />
                   </Col>
                 </Row>
-                {/* Seccion de Textfields   
-                <Form noValidate validated={this.state.form_validated} onSubmit={this.handleSubmit}>
-                  <Form.Row>
-                    <FormGroup as={Col} md="4" controlId="validationCustom01">
-                      <Form.Label>Zona de Salida</Form.Label>
-                      <Form.Control
-                        required
-                        type="number"
-                        placeholder="74"                        
-                      />
-                    </Form.Group>                    
-                  </Form.Row>
-                </Form>
-                */}
+                <Row>
+                  <Col md={6}>
+                    <form>
+                      <FormGroup
+                        controlId="formBasicText"
+                        validationState={this.getValidationState()}
+                      >
+                        <ControlLabel>Zona Salida</ControlLabel>
+                        <FormControl
+                          type="number"
+                          placeholder="Zona de salida"
+                          onChange={(ev) =>
+                            this.setState({
+                              ...this.state,
+                              zona_salida: ev.target.value,
+                            })
+                          }
+                        />
+                        <FormControl.Feedback />
+                        <HelpBlock>1 - 263</HelpBlock>
+                      </FormGroup>
+                    </form>
+                  </Col>
+                  <Col md={6}>
+                    <form>
+                      <FormGroup                        
+                        validationState={this.getValidationState()}
+                      >
+                        <ControlLabel>Zona Llegada</ControlLabel>
+                        <FormControl
+                          type="number"
+                          placeholder="Zona de llegada"
+                          onChange={(ev) =>
+                            this.setState({
+                              ...this.state,
+                              zona_llegada: ev.target.value,
+                            })
+                          }
+                        />
+                        <FormControl.Feedback />
+                        <HelpBlock>1 - 263</HelpBlock>
+                      </FormGroup>
+                    </form>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col md={4}>
+                    <DropdownButton   
+                      bsStyle="info"                   
+                      title={"Mes"}
+                      key={2409}
+                      id={`dropdown-basic-${2409}`}
+                    >
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(0)}>
+                        Enero
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(1)}>
+                        Febrero
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(2)}>
+                        Marzo
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(3)}>
+                        Abril
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(4)}>
+                        Mayo
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(5)}>
+                        Junio
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(6)}>
+                        Julio
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(7)}>
+                        Agosto
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(8)}>
+                        Septiembre
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(9)}>
+                        Octubre
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(10)}>
+                        Noviembre
+                      </MenuItem>
+                      <MenuItem eventKey={0} onSelect={() => this.addMonth(11)}>
+                        Diciembre
+                      </MenuItem>                      
+                    </DropdownButton>
+                  </Col>
+                  <Col md={8}>
+                    <Button
+                      bsStyle="success"
+                      onClick={this.submitQuery}
+                    >
+                      Crear consulta
+                    </Button>
+                  </Col>
+                </Row>
               </Grid>
             </div>
-          }          
+          }
         />
       </Col>
     );
@@ -404,7 +526,9 @@ class RF2 extends Component {
             {this.renderControlPanel()}
           </Row>
           <Row>
-            {this.state.table_data.map((table, key) => this.renderTable(table, key))}
+            {this.state.table_data.map((table, key) =>
+              this.renderTable(table, key)
+            )}
           </Row>
         </Grid>
       </div>
