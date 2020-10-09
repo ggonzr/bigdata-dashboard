@@ -35,6 +35,7 @@ import {
 import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
 import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox";
+import { executeRf2 } from "services/rf2";
 
 class RF2 extends Component {
   //Variables estaticas
@@ -56,44 +57,14 @@ class RF2 extends Component {
   constructor(props) {
     super(props);
     this.addRemoveDay = this.addRemoveDay.bind(this);
-    this.state = {
-      form_validated: false,
+    this.state = {      
       dias: [],
       consultas_realizadas: 0,
       dataBar: {
-        labels: ["Consulta #1"],
-        series: [["1"], ["3"], ["5"]],
+        labels: [],
+        series: [],
       },
-      table_data: [
-        {
-          consulta: 1,
-          data: [
-            [
-              "1",
-              "Amarillo",
-              "$36,738",
-              "Hoy",
-              "Chapinero",
-              "Colina Campestre",
-              "$12.75",
-            ],
-          ],
-        },
-        {
-          consulta: 2,
-          data: [
-            [
-              2,
-              "Verde",
-              "$36,738",
-              "Hoy",
-              "Bellavista",
-              "La Riviera",
-              "$12.75",
-            ],
-          ],
-        },
-      ],
+      table_data: [],
     };
   }
 
@@ -219,7 +190,7 @@ class RF2 extends Component {
    * @param {*} add True si se desea agregar el numero, false para eliminarlo
    */
   addRemoveDay(number, add) {
-    const { dias } = this.state;
+    let { dias } = this.state;
     if (add) {
       dias.push(number);
       this.setState({
@@ -227,7 +198,11 @@ class RF2 extends Component {
         dias: dias,
       });
     } else {
-      dias.filter((val) => val !== number);
+      dias = dias.filter((el) => {
+        if (el !== number) {
+          return el;
+        }        
+      });
       this.setState({
         ...this.state,
         dias: dias,
@@ -337,9 +312,41 @@ class RF2 extends Component {
    * Crear consulta
    */
   
-  submitQuery(ev) {
-    ev.preventDefault();
-    console.log("Consulta")
+  submitQuery() {    
+    if (this.state.dias.length === 0) {
+      alert("Por favor seleccione al menos un dia");      
+    }
+    else if (this.state.month === undefined) {
+      alert("Por favor seleccione un mes");            
+    }
+    else if (this.state.zona_llegada === undefined) {
+      alert("Por favor determine una zona de llegada");
+    }
+    else if (this.state.zona_salida === undefined) {
+      alert("Por favor determine una zona de salida");
+    }
+    else {
+      let dias = "";      
+      for (let i = 0; i < this.state.dias.length; i++) {
+        dias += `${this.state.dias[i]};`;
+      }      
+      dias = (this.state.dias.length === 1) ? dias : dias.slice(0, -1);
+      let zonas = `${this.state.zona_salida};${this.state.zona_llegada}`;
+      let mes = parseInt(this.state.month)
+      const params = {
+        dias: dias,
+        zonas: zonas,
+        mes: mes
+      };
+
+      //Actualizar datos
+      executeRf2(params)
+      .then((res) => {
+        this.addChartData(this.state, res.data);
+        this.addResultTable(this.state, res.data);
+      })
+      .catch((err) => console.error(err));
+    }
   }
 
   /**
@@ -503,7 +510,10 @@ class RF2 extends Component {
                   <Col md={8}>
                     <Button
                       bsStyle="success"
-                      onClick={this.submitQuery}
+                      onClick={(ev) => {
+                        ev.preventDefault();
+                        this.submitQuery();
+                      }}
                     >
                       Crear consulta
                     </Button>
