@@ -30,12 +30,13 @@ import {
   HelpBlock,
   MenuItem,
   DropdownButton,
-  Button
+  Button,
 } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
 import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox";
-import { executeRf2 } from "services/rf2";
+import { executeRf2, retrieveData } from "services/backend";
+import { Validator } from "jsonschema";
 
 class RF2 extends Component {
   //Variables estaticas
@@ -54,17 +55,28 @@ class RF2 extends Component {
     "Promedio",
   ];
 
+  validator = new Validator();
+  schema = {
+    minAmarillo: "string",
+    maxAmarillo: "string",
+    meanAmarillo: "string",
+    minVerde: "string",
+    maxVerde: "string",
+    meanVerde: "string",
+  };
+
   constructor(props) {
     super(props);
     this.addRemoveDay = this.addRemoveDay.bind(this);
-    this.state = {      
+    this.state = {
       dias: [],
       consultas_realizadas: 0,
       dataBar: {
         labels: [],
-        series: [],
+        series: [[], [], []],
       },
       table_data: [],
+      request: [],
     };
   }
 
@@ -201,7 +213,7 @@ class RF2 extends Component {
       dias = dias.filter((el) => {
         if (el !== number) {
           return el;
-        }        
+        }
       });
       this.setState({
         ...this.state,
@@ -311,42 +323,87 @@ class RF2 extends Component {
   /**
    * Crear consulta
    */
-  
-  submitQuery() {    
+
+  submitQuery() {
     if (this.state.dias.length === 0) {
-      alert("Por favor seleccione al menos un dia");      
-    }
-    else if (this.state.month === undefined) {
-      alert("Por favor seleccione un mes");            
-    }
-    else if (this.state.zona_llegada === undefined) {
+      alert("Por favor seleccione al menos un dia");
+    } else if (this.state.month === undefined) {
+      alert("Por favor seleccione un mes");
+    } else if (this.state.zona_llegada === undefined) {
       alert("Por favor determine una zona de llegada");
-    }
-    else if (this.state.zona_salida === undefined) {
+    } else if (this.state.zona_salida === undefined) {
       alert("Por favor determine una zona de salida");
-    }
-    else {
-      let dias = "";      
+    } else {
+      let dias = "";
       for (let i = 0; i < this.state.dias.length; i++) {
         dias += `${this.state.dias[i]};`;
-      }      
-      dias = (this.state.dias.length === 1) ? dias : dias.slice(0, -1);
+      }
+      dias = this.state.dias.length === 1 ? dias : dias.slice(0, -1);
       let zonas = `${this.state.zona_salida};${this.state.zona_llegada}`;
-      let mes = parseInt(this.state.month)
+      let mes = parseInt(this.state.month);
       const params = {
         dias: dias,
         zonas: zonas,
-        mes: mes
+        mes: mes,
       };
 
-      //Actualizar datos
+      //Ejecutar la consulta
       executeRf2(params)
-      .then((res) => {
-        this.addChartData(this.state, res.data);
-        this.addResultTable(this.state, res.data);
-      })
-      .catch((err) => console.error(err));
+        .then((res) => {
+          const { request } = this.state;
+          request.push(res.data);
+          alert(`Se ha creado la nueva consulta con el ID: ${res.data.id}`);
+          this.setState({
+            ...this.state,
+            request: request,
+          });
+        })
+        .catch((err) => console.error(err));
     }
+  }
+
+  /**
+   * Recupera la consulta y agregar los datos
+   */
+  retrieveRequest() {
+    let { request } = this.state;
+    console.log(request);
+    if (request.length === 0) {
+      alert("Agregue una consulta");
+      return;
+    }
+    retrieveData(request[0].id)
+      .then((res) => {
+        if (this.validator.validate(res.data, this.schema).errors.length === 0) {
+          console.log("Validator", this.validator.validate(res.data, this.schema));
+          console.log("Data", res);
+          this.addChartData(this.state, res.data);
+          this.addResultTable(this.state, res.data);
+          request.shift();
+          this.setState({
+            ...this.state,
+            request: request,
+          });
+        } else {
+          alert("Consulta sin resultados");
+          request.shift();
+          this.setState({
+            ...this.state,
+            request: request,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        const { status } = err.response;
+        if (status === 206) {
+          alert(`La peticion con ID: ${request[0].id} 
+               se esta procesando aún. Intente mas tarde
+            `);
+        } else {
+          console.error("Error fatal al recuperar la respuesta", err);
+        }
+      });
   }
 
   /**
@@ -441,9 +498,7 @@ class RF2 extends Component {
                   </Col>
                   <Col md={6}>
                     <form>
-                      <FormGroup                        
-                        validationState={this.getValidationState()}
-                      >
+                      <FormGroup validationState={this.getValidationState()}>
                         <ControlLabel>Zona Llegada</ControlLabel>
                         <FormControl
                           type="number"
@@ -463,8 +518,8 @@ class RF2 extends Component {
                 </Row>
                 <Row>
                   <Col md={4}>
-                    <DropdownButton   
-                      bsStyle="info"                   
+                    <DropdownButton
+                      bsStyle="info"
                       title={"Mes"}
                       key={2409}
                       id={`dropdown-basic-${2409}`}
@@ -504,7 +559,7 @@ class RF2 extends Component {
                       </MenuItem>
                       <MenuItem eventKey={0} onSelect={() => this.addMonth(11)}>
                         Diciembre
-                      </MenuItem>                      
+                      </MenuItem>
                     </DropdownButton>
                   </Col>
                   <Col md={8}>
@@ -516,6 +571,17 @@ class RF2 extends Component {
                       }}
                     >
                       Crear consulta
+                    </Button>
+                  </Col>
+                  <Col md={6}>
+                    <Button
+                      bsStyle="warning"
+                      onClick={(ev) => {
+                        ev.preventDefault();
+                        this.retrieveRequest();
+                      }}
+                    >
+                      Recuperar consulta
                     </Button>
                   </Col>
                 </Row>
