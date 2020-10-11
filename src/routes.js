@@ -15,22 +15,12 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import Dashboard from "views/Dashboard.jsx";
 import UserProfile from "views/UserProfile.jsx";
-import TableList from "views/TableList.jsx";
 import Maps from "views/Maps.jsx";
-import Notifications from "views/Notifications.jsx";
 import RF2 from "views/RF2.jsx";
 import RF1 from "views/RF1.jsx";
 
-const dashboardRoutes = [
-  {
-    path: "/dashboard",
-    name: "Dashboard",
-    icon: "pe-7s-graph",
-    component: Dashboard,
-    layout: "/admin"
-  },  
+const dashboardRoutes = [  
   {
     path: "/rf1",
     name: "Req. Funcional 1",
@@ -44,28 +34,14 @@ const dashboardRoutes = [
     icon: "pe-7s-graph3",    
     component: RF2,
     layout: "/admin"
-  },  
-  {
-    path: "/table",
-    name: "Table List",
-    icon: "pe-7s-note2",
-    component: TableList,
-    layout: "/admin"
-  },  
+  },    
   {
     path: "/maps",
     name: "Maps",
     icon: "pe-7s-map-marker",
     component: Maps,
     layout: "/admin"
-  },
-  {
-    path: "/notifications",
-    name: "Notifications",
-    icon: "pe-7s-bell",
-    component: Notifications,
-    layout: "/admin"
-  },
+  },  
   {
     upgrade: true,
     path: "/integrantes",

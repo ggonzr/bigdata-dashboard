@@ -27,16 +27,12 @@ import {
   FormControl,
   FormGroup,
   ControlLabel,
-  HelpBlock,
-  MenuItem,
-  DropdownButton,
+  HelpBlock,  
   Button,
 } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
-import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox";
-import { executeRf2, retrieveData } from "services/backend";
-import { Validator } from "jsonschema";
+import { executeRf1, retrieveData } from "services/backend";
 
 class RF1 extends Component {
   //Variables estaticas
@@ -46,7 +42,7 @@ class RF1 extends Component {
   };
 
   mockedData = {
-    1: "76;FHV,Thursday,1: 1@FHV,Monday,1: 1",
+    1: "76;FHV,Thursday,1: 1@FHV,Monday,1: 1@GREEN,Thursday,1: 1@GREEN,Monday,1: 1@YELLOW,Thursday,1: 1@YELLOW,Monday,1: 1@FVFHV,Thursday,1: 1@FVFHV,Monday,1: 1",
     2: "25;FHV,Thursday,2: 21@FHV,Monday,2: 4",
     3: "3;FHV,Thursday,3: 1@FHV,Monday,3: 2",
   }
@@ -54,44 +50,27 @@ class RF1 extends Component {
   table_head = [
     "ID",
     "Tipo",
-    "Total",
-    "Fecha",
-    "Zona de Ida",
-    "Zona de Llegada",
-    "Promedio",
-  ];
-
-  validator = new Validator();
-  schema = {
-    minAmarillo: "string",
-    maxAmarillo: "string",
-    meanAmarillo: "string",
-    minVerde: "string",
-    maxVerde: "string",
-    meanVerde: "string",
-  };
+    "Dia",
+    "Vehiculos",    
+  ]; 
 
   constructor(props) {
-    super(props);
-    this.addRemoveDay = this.addRemoveDay.bind(this); 
+    super(props);    
     this.groupDataRf1 = this.groupDataRf1.bind(this);   
-    this.state = {
-      dias: [],
-      n: 1,
-      consultas_realizadas: 0,
-      dataBar: {
-        labels: [],
-        series: [[], [], []],
-      },
-      table_data: [],
+    this.state = {      
+      n: 3,
+      hora_inicial: "",
+      hora_final: "",
+      consultas: [],
       request: [],
+      table_data: []
     };
   }
 
   componentDidMount() {
     this.setState({
       ...this.state,
-      request: this.groupDataRf1(this.mockedData)
+      consultas: this.groupDataRf1(this.mockedData)
     })
   }
 
@@ -109,42 +88,7 @@ class RF1 extends Component {
       legend.push(legendBar["names"][i]);
     }
     return legend;
-  }
-
-  /**
-   * Permite agregar un nuevo dato al grafico de barras
-   * @param {*} state Estado del componente, desagrega los siguientes datos:
-   *            consultas_realizadas: Numero de consultas agregadas, tuplas en la grafica
-   *            dataBar: Objetos con los datos del grafico
-   *            consulta: Resultados de la consulta, Response
-   */
-  addChartData = ({ consultas_realizadas, dataBar }, consulta) => {
-    //Amarillo
-    dataBar.labels.push(`Consulta #${consultas_realizadas} - Amarillo`);
-    //Valor minimo
-    dataBar.series[0].push(consulta.minAmarillo.split(";")[0]);
-    //Valor promedio
-    dataBar.series[1].push(consulta.meanAmarillo);
-    //Valor maximo
-    dataBar.series[2].push(consulta.maxAmarillo.split(";")[0]);
-
-    //Verde
-    dataBar.labels.push(`Consulta #${consultas_realizadas} - Verde`);
-    //Valor minimo
-    dataBar.series[0].push(consulta.minVerde.split(";")[0]);
-    //Valor promedio
-    dataBar.series[1].push(consulta.meanVerde);
-    //Valor maximo
-    dataBar.series[2].push(consulta.maxVerde.split(";")[0]);
-
-    //Actualizar el estado e incrementar el contador
-    consultas_realizadas++;
-    this.setState({
-      ...this.state,
-      consultas_realizadas: consultas_realizadas,
-      dataBar: dataBar,
-    });
-  }
+  }  
 
   /**
    * Permite añadir un resultado para que sea renderizado a forma de tabla
@@ -209,33 +153,7 @@ class RF1 extends Component {
       ...this.state,
       table_data: table_data,
     });
-  }
-
-  /**
-   * Permite añadir o remover un dia para los parametros segun el checkbox
-   * @param {*} number Numero del dia de la semana 1 como Domingo 7 como Sabado
-   * @param {*} add True si se desea agregar el numero, false para eliminarlo
-   */
-  addRemoveDay = (number, add)  => {
-    let { dias } = this.state;
-    if (add) {
-      dias.push(number);
-      this.setState({
-        ...this.state,
-        dias: dias,
-      });
-    } else {
-      dias = dias.filter((el) => {
-        if (el !== number) {
-          return el;
-        }
-      });
-      this.setState({
-        ...this.state,
-        dias: dias,
-      });
-    }
-  }
+  }  
 
   /**
    * Permite validar el Form
@@ -254,28 +172,18 @@ class RF1 extends Component {
       return "error";
     }
   }
-
-  /**
-   * Agregar mes de consulta
-   * @param {*} month Mes de consulta
-   */
-  addMonth = (month) => {
-    this.setState({
-      ...this.state,
-      month: month,
-    });
-  }
-
+  
   /**
    * Renderiza cada una de las tablas con los resultado
-   * @param {*} table_data Objeto con el numero de consulta y las filas
+   * @param {*} table_data Objeto con el formato de consulta del top (dado por groupData())
    */
-  renderTable = (table_data, key) => {
+  renderTable = (table_data, key) => {  
+    console.info("Table Content", table_data);     
     return (
-      <Col key={key} md={12}>
+      <Col key={`table${key}`} md={12}>
         <Card
-          title={`Resultados de la consulta #${table_data.consulta}`}
-          category="Valores minimo, maximo y promedio para cada tipo de taxi"
+          title={`Top ${key + 1} - Zona ${table_data.key}`}
+          category="Zonas con mayor solicitud de taxis en un rango de horas determinado"
           ctTableFullWidth
           ctTableResponsive
           content={
@@ -289,9 +197,12 @@ class RF1 extends Component {
               </thead>
               <tbody>
                 {table_data.data.map((prop, key) => {
+                  let kv = prop.split(":");
+                  let vSplit = kv[0].split(",");
+                  let rData = [key + 1, vSplit[0], vSplit[1], kv[1]];
                   return (
                     <tr key={key}>
-                      {prop.map((prop, key) => {
+                      {rData.map((prop, key) => {                        
                         return <td key={key}>{prop}</td>;
                       })}
                     </tr>
@@ -380,12 +291,12 @@ class RF1 extends Component {
     }
     
     return (
-      <Col md={8}>
+      <Col key={`Col${key}`} md={12}>
         <Card
           id={`rf1Zona${key}`}
           title={`Zona #${key}`}
           category={`Vehiculos que salieron de la zona: ${value}`}
-          stats="Tiempos de respuesta de la consulta"
+          stats="Top de salida de vehiculos por zonas en NYC"
           statsIcon="fa fa-check"
           content={
             <div className="ct-chart">
@@ -410,30 +321,21 @@ class RF1 extends Component {
    */
 
   submitQuery = () => {
-    if (this.state.dias.length === 0) {
-      alert("Por favor seleccione al menos un dia");
-    } else if (this.state.month === undefined) {
-      alert("Por favor seleccione un mes");
-    } else if (this.state.zona_llegada === undefined) {
-      alert("Por favor determine una zona de llegada");
-    } else if (this.state.zona_salida === undefined) {
-      alert("Por favor determine una zona de salida");
-    } else {
-      let dias = "";
-      for (let i = 0; i < this.state.dias.length; i++) {
-        dias += `${this.state.dias[i]};`;
-      }
-      dias = this.state.dias.length === 1 ? dias : dias.slice(0, -1);
-      let zonas = `${this.state.zona_salida};${this.state.zona_llegada}`;
-      let mes = parseInt(this.state.month);
-      const params = {
-        dias: dias,
-        zonas: zonas,
-        mes: mes,
+    const { hora_inicial, hora_final } = this.state;
+    if (hora_inicial.length === 0 || hora_inicial.split(":").length !== 3) {
+      alert("Por favor ingrese adecuadamente la hora");
+    } else if (hora_final.length === 0 || hora_final.split(":").length !== 3) {
+      alert("Por favor ingrese adecuadamente la hora");
+    }
+    else {
+      return console.log("Validado");     
+      let body = {
+        horaInicio: hora_inicial,
+        horaFin: hora_final
       };
-
+      
       //Ejecutar la consulta
-      executeRf2(params)
+      executeRf1(body)
         .then((res) => {
           const { request } = this.state;
           request.push(res.data);
@@ -468,13 +370,10 @@ class RF1 extends Component {
     // Ordenarlos
     props.sort(function (p1, p2) {
       return p2.value - p1.value;
-    });
-
-    console.log("Ordenados", props);
+    });   
 
     // Retornar el top N
-    let top = props.slice(0, n);
-    console.log("Top 1", top);
+    let top = props.slice(0, n);    
     return top;
   }
 
@@ -493,7 +392,7 @@ class RF1 extends Component {
         const groupData = this.groupDataRf1(res.data);
         this.setState({
           ...this.state,
-          groupData: groupData
+          consultas: groupData
         });
       })
       .catch((err) => {
@@ -513,69 +412,15 @@ class RF1 extends Component {
    * Permite renderizar el panel de control de la aplicacion
    */
   renderControlPanel = () => {
-    return (
-      <Col md={4}>
+    return (      
         <Card
           statsIcon="fa fa-cog"
           title="Panel de control"
           category="Seleccion de parametros"
-          stats="Requerimiento funcional #2"
+          stats="Requerimiento funcional #1"
           content={
-            <div className="content">
-              <label>Seleccion de dias</label>
-              <Grid fluid>
-                {/* Seccion de Checkboxes */}
-                <Row>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={1}
-                      label={"Domingo"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={2}
-                      label={"Lunes"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={3}
-                      label={"Martes"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={4}
-                      label={"Miercoles"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={5}
-                      label={"Jueves"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={6}
-                      label={"Viernes"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <CustomCheckbox
-                      number={7}
-                      label={"Sabado"}
-                      addNumber={this.addRemoveDay}
-                    />
-                  </Col>
-                </Row>
+            <div className="content">              
+              <Grid fluid>                
                 <Row>
                   <Col md={6}>
                     <form>
@@ -583,89 +428,44 @@ class RF1 extends Component {
                         controlId="formBasicText"
                         validationState={this.getValidationState()}
                       >
-                        <ControlLabel>Zona Salida</ControlLabel>
+                        <ControlLabel>Hora Inicial</ControlLabel>
                         <FormControl
-                          type="number"
-                          placeholder="Zona de salida"
+                          type="text"
+                          placeholder="Hora Inicial"
                           onChange={(ev) =>
                             this.setState({
                               ...this.state,
-                              zona_salida: ev.target.value,
+                              hora_inicial: ev.target.value,
                             })
                           }
                         />
                         <FormControl.Feedback />
-                        <HelpBlock>1 - 263</HelpBlock>
+                        <HelpBlock>HH:mm:ss</HelpBlock>
                       </FormGroup>
                     </form>
                   </Col>
                   <Col md={6}>
                     <form>
                       <FormGroup validationState={this.getValidationState()}>
-                        <ControlLabel>Zona Llegada</ControlLabel>
+                        <ControlLabel>Hora final</ControlLabel>
                         <FormControl
-                          type="number"
-                          placeholder="Zona de llegada"
+                          type="text"
+                          placeholder="Hora final"
                           onChange={(ev) =>
                             this.setState({
                               ...this.state,
-                              zona_llegada: ev.target.value,
+                              hora_final: ev.target.value,
                             })
                           }
                         />
                         <FormControl.Feedback />
-                        <HelpBlock>1 - 263</HelpBlock>
+                        <HelpBlock>HH:mm:ss</HelpBlock>
                       </FormGroup>
                     </form>
                   </Col>
                 </Row>
-                <Row>
-                  <Col md={4}>
-                    <DropdownButton
-                      bsStyle="info"
-                      title={"Mes"}
-                      key={2409}
-                      id={`dropdown-basic-${2409}`}
-                    >
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(0)}>
-                        Enero
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(1)}>
-                        Febrero
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(2)}>
-                        Marzo
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(3)}>
-                        Abril
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(4)}>
-                        Mayo
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(5)}>
-                        Junio
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(6)}>
-                        Julio
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(7)}>
-                        Agosto
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(8)}>
-                        Septiembre
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(9)}>
-                        Octubre
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(10)}>
-                        Noviembre
-                      </MenuItem>
-                      <MenuItem eventKey={0} onSelect={() => this.addMonth(11)}>
-                        Diciembre
-                      </MenuItem>
-                    </DropdownButton>
-                  </Col>
-                  <Col md={8}>
+                <Row>                  
+                  <Col md={6}>
                     <Button
                       bsStyle="success"
                       onClick={(ev) => {
@@ -691,8 +491,7 @@ class RF1 extends Component {
               </Grid>
             </div>
           }
-        />
-      </Col>
+        />      
     );
   }
 
@@ -700,14 +499,14 @@ class RF1 extends Component {
     return (
       <div className="content">
         <Grid fluid>
-          <Row>
-            {this.state.request.map((req) => this.renderBarGraph(req))}
-            {this.renderControlPanel()}
+          <Row> 
+            <Col>
+              {this.renderControlPanel()}
+            </Col>
+            {this.state.consultas.map((req) => this.renderBarGraph(req))}            
           </Row>
           <Row>
-            {this.state.table_data.map((table, key) =>
-              this.renderTable(table, key)
-            )}
+            {this.state.consultas.map((table, key) => this.renderTable(table, key))}
           </Row>
         </Grid>
       </div>
