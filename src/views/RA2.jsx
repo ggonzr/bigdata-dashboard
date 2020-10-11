@@ -27,9 +27,10 @@ import {
   Button,
 } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
-import { optionsBar, responsiveBar } from "variables/Variables.jsx";
+import { optionsBar, responsiveBar, style } from "variables/Variables.jsx";
 import { executeRa2, retrieveData } from "services/backend";
 import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox2.jsx";
+import NotificationSystem from "react-notification-system";
 
 class RA2 extends Component {
   //Variables estaticas
@@ -83,8 +84,23 @@ class RA2 extends Component {
     this.setState({
       ...this.state,
       consultas: this.mockedData,
+      _notificationSystem: this.refs.notificationSystem
     });
-  }
+  };
+
+  notify = (message) => {
+    this.state._notificationSystem.addNotification({
+      title: <span data-notify="icon" className="pe-7s-info" />,
+      message: (
+        <div>
+          {message}
+        </div>
+      ),
+      level: "info",
+      position: "tr",
+      autoDismiss: 15
+    });
+  };
 
   /**
    * Control para el checkbox
@@ -297,7 +313,7 @@ class RA2 extends Component {
   submitQuery = () => {
     const { selectedId } = this.state;
     if (selectedId === null) {
-      alert("Por favor seleccione una temporada")
+      this.notify("Por favor seleccione una temporada")
     }
     else {
       //Ejecutar la consulta
@@ -311,7 +327,7 @@ class RA2 extends Component {
         .then((res) => {
           const { request } = this.state;
           request.push(res.data);
-          alert(`Se ha creado la nueva consulta con el ID: ${res.data.id}`);
+          this.notify(`Se ha creado la nueva consulta con el ID: ${res.data.id}`);
           this.setState({
             ...this.state,
             request: request,
@@ -329,7 +345,7 @@ class RA2 extends Component {
     let { request } = this.state;
     console.log(request);
     if (request.length === 0) {
-      alert("Agregue una consulta");
+      this.notify("Agregue una consulta");
       return;
     }
     retrieveData(request[0].id)
@@ -343,7 +359,7 @@ class RA2 extends Component {
         console.error(err);
         const { status } = err.response;
         if (status === 206) {
-          alert(`La peticion con ID: ${request[0].id} 
+          this.notify(`La peticion con ID: ${request[0].id} 
                se esta procesando aún. Intente mas tarde
             `);
         } else {
@@ -413,6 +429,7 @@ class RA2 extends Component {
   render() {
     return (
       <div className="content">
+        <NotificationSystem ref="notificationSystem" style={style} />
         <Grid fluid>
           <Row>
             <Col>{this.renderControlPanel()}</Col>
