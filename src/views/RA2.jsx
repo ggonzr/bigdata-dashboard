@@ -23,16 +23,13 @@ import {
   Grid,
   Row,
   Col,
-  Table,
-  FormControl,
-  FormGroup,
-  ControlLabel,
-  HelpBlock,
+  Table,  
   Button,
 } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
-import { executeRf1, retrieveData } from "services/backend";
+import { executeRa2, retrieveData } from "services/backend";
+import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox2.jsx";
 
 class RA2 extends Component {
   //Variables estaticas
@@ -59,13 +56,26 @@ class RA2 extends Component {
 
   table_head = ["ID", "Año", "Verde", "Amarillo", "FHV", "FHFHV"];
 
+  checkBoxes = [
+    {number: 1, label: "Año nuevo"},
+    {number: 2, label: "San Valentin"},
+    {number: 3, label: "Dia del Presidente"},
+    {number: 4, label: "Dia de la independencia"},
+    {number: 5, label: "Dia del trabajador"},
+    {number: 6, label: "Halloween"},
+    {number: 7, label: "Dia de accion de gracias"},
+    {number: 8, label: "Navidad"},
+  ];
+
   constructor(props) {
     super(props);
+    this.handleChanges = this.handleChanges.bind(this);
     this.state = {
       temporada: -1,
       consultas: [],
       request: [],
       table_data: [],
+      selectedId: null
     };
   }
 
@@ -74,6 +84,16 @@ class RA2 extends Component {
       ...this.state,
       consultas: this.mockedData,
     });
+  }
+
+  /**
+   * Control para el checkbox
+   * @param {} id ID del checkbox
+   * @param {*} value Booleano que indica a cada checkbox si debe estar habilitado para ser seleccionado
+   */
+
+  handleChanges(id, value) { 
+    this.setState({selectedId: value===true ? id : null})
   }
 
   /**
@@ -112,13 +132,13 @@ class RA2 extends Component {
    * Renderiza cada una de las tablas con los resultado
    * @param {*} table_data Objeto con el formato de consulta del top (dado por groupData())
    */
-  renderTable = (table_data, key) => {
-    console.info("Table Content", table_data);
+  renderTable = (table_data, key) => {  
+    let temporada = (this.state.selectedId) ? this.checkBoxes[this.state.selectedId - 1].label : "";  
     return (
       //<año>:<verde>;<amarillo>;<fhv>;<fhfhv>
       <Col key={`table${key}`} md={12}>
         <Card
-          title={`Demanda de vehiculos en determinada temporada`}
+          title={`Demanda de vehiculos en la temporada: ${temporada}`}
           category="Análisis de demanda de vehiculos por temporada especial del año"
           ctTableFullWidth
           ctTableResponsive
@@ -132,8 +152,7 @@ class RA2 extends Component {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(table_data).map(function (key, idx) {
-                  console.info("Object", this)
+                {Object.keys(table_data).map(function (key, idx) {                  
                   let values = this[key].split(";");
                   let row = [idx + 1, key].concat(values); 
                   return (
@@ -192,6 +211,7 @@ class RA2 extends Component {
    * @param {*} consulta Objeto de la respuesta segun el marco de referencia.
    */
   renderBarGraph = (consulta) => {
+    let temporada = (this.state.selectedId) ? this.checkBoxes[this.state.selectedId - 1].label : "";  
     let dataBar = {
       labels: [],
       series: [[], [], [], []],
@@ -211,7 +231,7 @@ class RA2 extends Component {
       <Col key={`Col${consulta.key}`} md={12}>
         <Card
           id={`rf1Zona${consulta.key}`}
-          title={`Temporada`}
+          title={`Temporada: ${temporada}`}
           category={`Analisis de demanda por temporada de los vehiculos`}
           stats="Analisis de temporada de solicitud de vehiculos en NYC"
           statsIcon="fa fa-check"
@@ -234,24 +254,60 @@ class RA2 extends Component {
   };
 
   /**
+   * Transforma la temporada a una fecha en especifico
+   */
+
+  selectData = () => {    
+    let date = "";
+    switch (this.state.selectedId) {
+      case 1:
+        date = "2019-01-01 00:00:00"
+        break;
+      case 2:
+        date = "2019-02-14 00:00:00"
+        break;
+      case 3:
+        date = "2019-02-17 00:00:00"
+        break;
+      case 4:
+        date = "2019-07-04 00:00:00"
+        break;
+      case 5:
+        date = "2019-09-07 00:00:00"
+        break;
+      case 6:
+        date = "2019-10-31 00:00:00"
+        break;
+      case 7:
+        date = "2019-11-26 00:00:00"
+        break;
+      case 8:
+        date = "2019-12-24 00:00:00"
+        break;      
+      default:
+        break;
+    }
+    return date;
+  };
+
+  /**
    * Crear consulta
    */
 
   submitQuery = () => {
-    const { hora_inicial, hora_final } = this.state;
-    if (hora_inicial.length === 0 || hora_inicial.split(":").length !== 3) {
-      alert("Por favor ingrese adecuadamente la hora");
-    } else if (hora_final.length === 0 || hora_final.split(":").length !== 3) {
-      alert("Por favor ingrese adecuadamente la hora");
-    } else {
-      return console.log("Validado");
-      let body = {
-        horaInicio: hora_inicial,
-        horaFin: hora_final,
+    const { selectedId } = this.state;
+    if (selectedId === null) {
+      alert("Por favor seleccione una temporada")
+    }
+    else {
+      //Ejecutar la consulta
+      const body = {
+        fecha: this.selectData()
       };
 
-      //Ejecutar la consulta
-      executeRf1(body)
+      return console.log("Validado", body);
+
+      executeRa2(body)
         .then((res) => {
           const { request } = this.state;
           request.push(res.data);
@@ -263,34 +319,7 @@ class RA2 extends Component {
         })
         .catch((err) => console.error(err));
     }
-  };
-
-  /**
-   * Permite agrupar los datos del requerimiento RF1 en grupos dado
-   * las N zonas mas grandes
-   * @param {*} datos Respuesta de la consulta
-   */
-  groupDataRf1 = (datos) => {
-    const { n } = this.state;
-
-    //Pasarlo a array para poder aplicar el sort
-    let props = Object.keys(datos).map(function (key) {
-      let value = this[key].split(";");
-      return {
-        key: key,
-        value: parseInt(value),
-        data: value[1].split("@"),
-      };
-    }, datos);
-
-    // Ordenarlos
-    props.sort(function (p1, p2) {
-      return p2.value - p1.value;
-    });
-
-    // Retornar el top N
-    let top = props.slice(0, n);
-    return top;
+      
   };
 
   /**
@@ -304,11 +333,10 @@ class RA2 extends Component {
       return;
     }
     retrieveData(request[0].id)
-      .then((res) => {
-        const groupData = this.groupDataRf1(res.data);
+      .then((res) => {        
         this.setState({
           ...this.state,
-          consultas: groupData,
+          consultas: res.data,
         });
       })
       .catch((err) => {
@@ -327,7 +355,7 @@ class RA2 extends Component {
   /**
    * Permite renderizar el panel de control de la aplicacion
    */
-  renderControlPanel = () => {
+  renderControlPanel = () => {    
     return (
       <Card
         statsIcon="fa fa-cog"
@@ -337,49 +365,20 @@ class RA2 extends Component {
         content={
           <div className="content">
             <Grid fluid>
+              {/* Seccion de Checkboxes */}
               <Row>
-                <Col md={6}>
-                  <form>
-                    <FormGroup
-                      controlId="formBasicText"
-                      validationState={this.getValidationState()}
-                    >
-                      <ControlLabel>Hora Inicial</ControlLabel>
-                      <FormControl
-                        type="text"
-                        placeholder="Hora Inicial"
-                        onChange={(ev) =>
-                          this.setState({
-                            ...this.state,
-                            hora_inicial: ev.target.value,
-                          })
-                        }
-                      />
-                      <FormControl.Feedback />
-                      <HelpBlock>HH:mm:ss</HelpBlock>
-                    </FormGroup>
-                  </form>
-                </Col>
-                <Col md={6}>
-                  <form>
-                    <FormGroup validationState={this.getValidationState()}>
-                      <ControlLabel>Hora final</ControlLabel>
-                      <FormControl
-                        type="text"
-                        placeholder="Hora final"
-                        onChange={(ev) =>
-                          this.setState({
-                            ...this.state,
-                            hora_final: ev.target.value,
-                          })
-                        }
-                      />
-                      <FormControl.Feedback />
-                      <HelpBlock>HH:mm:ss</HelpBlock>
-                    </FormGroup>
-                  </form>
-                </Col>
-              </Row>
+                {this.checkBoxes.map((data, idx) => {
+                  return (
+                    <Col md={4} key={`colCheckBox${idx}`}>
+                    <CustomCheckbox
+                      selectedId={this.state.selectedId}
+                      data={data}
+                      handleChanges={this.handleChanges}
+                    />
+                  </Col>
+                  );
+                })}
+              </Row>                              
               <Row>
                 <Col md={6}>
                   <Button
