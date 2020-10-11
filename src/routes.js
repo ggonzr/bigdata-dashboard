@@ -21,6 +21,7 @@ import TableList from "views/TableList.jsx";
 import Maps from "views/Maps.jsx";
 import Notifications from "views/Notifications.jsx";
 import RF2 from "views/RF2.jsx";
+import RF1 from "views/RF1.jsx";
 
 const dashboardRoutes = [
   {
@@ -30,6 +31,13 @@ const dashboardRoutes = [
     component: Dashboard,
     layout: "/admin"
   },  
+  {
+    path: "/rf1",
+    name: "Req. Funcional 1",
+    icon: "pe-7s-cloud-upload",    
+    component: RF1,
+    layout: "/admin"
+  },
   {
     path: "/rf2",
     name: "Req. Funcional 2",
