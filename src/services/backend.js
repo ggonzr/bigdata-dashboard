@@ -4,6 +4,7 @@ const host = "http://ec2-54-234-44-198.compute-1.amazonaws.com:24009/";
 const rf2 = host + "bigdata07/execute/rf2";
 const rf1 = host + "bigdata07/execute/rf1";
 const ra2 = host + "bigdata07/execute/ra2";
+const ra1_1 = host + "bigdata07/execute/ra1_1";
 const is_complete = host + "complete/"
 
 /**
@@ -46,6 +47,20 @@ export const executeRa2 = (body) => {
     };
     return axios.post(ra2, params);
 }
+
+/**
+ * Permite ejecutar el req. analisis 1 - Pregunta 1
+ * @param {*} body Cuerpo de la consulta
+ */
+
+export const executeRa1_1 = () => {
+    const params = {        
+        input: "/user/bigdata07/input/small/",
+        output: "/user/bigdata07/output",
+    };
+    return axios.post(ra1_1, params);
+}
+
 
 /**
  * Permite recuperar la informacion de una consulta

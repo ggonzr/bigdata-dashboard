@@ -22,7 +22,7 @@ import ChartistGraph from "react-chartist";
 import { Grid, Row, Col, Table, Button } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
-import { executeRa2, retrieveData } from "services/backend";
+import { executeRa1_1, retrieveData } from "services/backend";
 import CustomCheckbox from "components/CustomCheckbox/CustomCheckbox2.jsx";
 
 class RA1_1 extends Component {
@@ -67,28 +67,13 @@ class RA1_1 extends Component {
     };
   }
 
-  componentDidMount() {
-    this.setState({
-      ...this.state,
-      consultas: this.mockedData,
-    });
-  }
-
-  componentDidUpdate(prevProps, prevState) {    
+  componentDidUpdate(prevProps, prevState) {
     if (this.state.selectedId !== prevState.selectedId) {
-      if (this.state.selectedId === null) {
-        this.setState({
-          ...this.state,
-          top: null,
-        });
-      }
-      else {
-        this.setState({
-          ...this.state,
-          top: this.topData(this.state.consultas),
-        });
-      }      
-    } 
+      this.setState({
+        ...this.state,
+        top: this.topData(this.state.consultas),
+      });
+    }
   }
 
   /**
@@ -98,8 +83,8 @@ class RA1_1 extends Component {
    */
 
   handleChanges(id, value) {
-    this.setState({ 
-      selectedId: value === true ? id : null 
+    this.setState({
+      selectedId: value === true ? id : null,
     });
   }
 
@@ -218,8 +203,9 @@ class RA1_1 extends Component {
    * Permite renderizar el grafico de barras con cada una de las zonas y sus datos
    * @param {*} consulta Objeto de la respuesta segun el marco de referencia.
    */
-  renderBarGraph = (consulta) => {    
-    let top = (this.state.selectedId !== null) ? `Top ${this.state.selectedId}` : ""; 
+  renderBarGraph = (consulta) => {
+    let top =
+      this.state.selectedId !== null ? `Top ${this.state.selectedId}` : "";
     let dataBar = {
       labels: [],
       series: [[], [], [], []],
@@ -338,29 +324,17 @@ class RA1_1 extends Component {
    */
 
   submitQuery = () => {
-    const { selectedId } = this.state;
-    if (selectedId === null) {
-      alert("Por favor seleccione una temporada");
-    } else {
-      //Ejecutar la consulta
-      const body = {
-        fecha: this.selectData(),
-      };
-
-      return console.log("Validado", body);
-
-      executeRa2(body)
-        .then((res) => {
-          const { request } = this.state;
-          request.push(res.data);
-          alert(`Se ha creado la nueva consulta con el ID: ${res.data.id}`);
-          this.setState({
-            ...this.state,
-            request: request,
-          });
-        })
-        .catch((err) => console.error(err));
-    }
+    executeRa1_1()
+      .then((res) => {
+        const { request } = this.state;
+        request.push(res.data);
+        alert(`Se ha creado la nueva consulta con el ID: ${res.data.id}`);
+        this.setState({
+          ...this.state,
+          request: request,
+        });
+      })
+      .catch((err) => console.error(err));
   };
 
   /**
@@ -457,13 +431,21 @@ class RA1_1 extends Component {
       return Object.keys(this.state.top).map((key, idx) => {
         return this.renderTable(key, this.state.consultas[key], idx);
       });
-    }
-    else if (this.state.consultas) {
+    } else if (this.state.consultas) {
       return Object.keys(this.state.consultas).map((key, idx) => {
         return this.renderTable(key, this.state.consultas[key], idx);
-      })
+      });
+    } else {
+      return null;
     }
-    else {
+  };
+
+  renderAllBarGraph = () => {
+    if (this.state.top !== null) {      
+      return this.renderBarGraph(this.state.top);
+    } else if (this.state.consultas) {
+      return this.renderBarGraph(this.state.consultas);
+    } else {
       return null;
     }
   };
@@ -474,13 +456,9 @@ class RA1_1 extends Component {
         <Grid fluid>
           <Row>
             <Col>{this.renderControlPanel()}</Col>
-            {this.state.consultas
-              ? this.renderBarGraph(this.state.consultas)
-              : null}
+            {this.renderAllBarGraph()}
           </Row>
-          <Row>
-            {this.renderAllTables()}
-          </Row>
+          <Row>{this.renderAllTables()}</Row>
         </Grid>
       </div>
     );
