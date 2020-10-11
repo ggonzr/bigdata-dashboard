@@ -34,44 +34,35 @@ import { Card } from "components/Card/Card.jsx";
 import { optionsBar, responsiveBar } from "variables/Variables.jsx";
 import { executeRf1, retrieveData } from "services/backend";
 
-class RF1 extends Component {
+class RA2 extends Component {
   //Variables estaticas
-  legendBar = {
+  legendBar = {    
     names: [
-      "Lunes",
-      "Martes",
-      "Miercoles",
-      "Jueves",
-      "Viernes",
-      "Sabado",
-      "Domingo",
+      "Verde",
+      "Amarillo",
+      "FHV",
+      "FHFHV",      
     ],
     types: [
       "info",
       "danger",
       "warning",
-      "primary",
-      "success",
-      "info",
-      "default",
+      "primary",      
     ],
   };
 
-  mockedData = {
-    1: "76;FHV,Thursday,1: 1@FHV,Monday,1: 1@GREEN,Thursday,1: 1@GREEN,Monday,1: 1@YELLOW,Thursday,1: 1@YELLOW,Monday,1: 1@FVFHV,Thursday,1: 1@FVFHV,Monday,1: 1",
-    2: "25;FHV,Thursday,2: 21@FHV,Monday,2: 4",
-    3: "3;FHV,Thursday,3: 1@FHV,Monday,3: 2",
+  mockedData = {    
+    2020: "235;254;123;678",
+    2019: "235;254;123;678",
+    2018: "235;254;123;678",
   };
 
-  table_head = ["ID", "Tipo", "Dia", "Vehiculos"];
+  table_head = ["ID", "Año", "Verde", "Amarillo", "FHV", "FHFHV"];
 
   constructor(props) {
     super(props);
-    this.groupDataRf1 = this.groupDataRf1.bind(this);
     this.state = {
-      n: 3,
-      hora_inicial: "",
-      hora_final: "",
+      temporada: -1,
       consultas: [],
       request: [],
       table_data: [],
@@ -81,7 +72,7 @@ class RF1 extends Component {
   componentDidMount() {
     this.setState({
       ...this.state,
-      consultas: this.groupDataRf1(this.mockedData),
+      consultas: this.mockedData,
     });
   }
 
@@ -124,10 +115,11 @@ class RF1 extends Component {
   renderTable = (table_data, key) => {
     console.info("Table Content", table_data);
     return (
+      //<año>:<verde>;<amarillo>;<fhv>;<fhfhv>
       <Col key={`table${key}`} md={12}>
         <Card
-          title={`Top ${key + 1} - Zona ${table_data.key}`}
-          category="Zonas con mayor solicitud de taxis en un rango de horas determinado"
+          title={`Demanda de vehiculos en determinada temporada`}
+          category="Análisis de demanda de vehiculos por temporada especial del año"
           ctTableFullWidth
           ctTableResponsive
           content={
@@ -140,18 +132,18 @@ class RF1 extends Component {
                 </tr>
               </thead>
               <tbody>
-                {table_data.data.map((prop, key) => {
-                  let kv = prop.split(":");
-                  let vSplit = kv[0].split(",");
-                  let rData = [key + 1, vSplit[0], vSplit[1], kv[1]];
+                {Object.keys(table_data).map(function (key, idx) {
+                  console.info("Object", this)
+                  let values = this[key].split(";");
+                  let row = [idx + 1, key].concat(values); 
                   return (
                     <tr key={key}>
-                      {rData.map((prop, key) => {
+                      {row.map((prop, key) => {
                         return <td key={key}>{prop}</td>;
                       })}
                     </tr>
                   );
-                })}
+                }, table_data)}
               </tbody>
             </Table>
           }
@@ -197,49 +189,31 @@ class RF1 extends Component {
 
   /**
    * Permite renderizar el grafico de barras con cada una de las zonas y sus datos
-   * @param {*} zona Objeto de la respuesta segun el marco de referencia
+   * @param {*} consulta Objeto de la respuesta segun el marco de referencia.
    */
-  renderBarGraph = ({ key, value, data }) => {
+  renderBarGraph = (consulta) => {
     let dataBar = {
       labels: [],
-      series: [[], [], [], [], [], [], []],
+      series: [[], [], [], []],
     };
-
-    let parseByClass = {};
-    for (let el of data) {
-      let values = el.split(":");
-      let keys = values[0].split(",");
-      let newValue = {
-        dia: this.giveBarPosition(keys[1].trim()),
-        cantidad: values[1].trim(),
-      };
-      if (parseByClass[keys[0].trim()]) {
-        // Si la llave esta definida
-        parseByClass[keys[0].trim()].push(newValue);
-      } else {
-        let parsedValues = [];
-        parsedValues.push(newValue);
-        parseByClass[keys[0].trim()] = parsedValues;
-      }
-    }
-
+    
     //Rellenar los datos en el objeto dataBar
-    for (const [key, value] of Object.entries(parseByClass)) {
+    for (const [key, value] of Object.entries(consulta)) {
       // Crear la nueva etiqueta en el grafico
       dataBar.labels.push(key);
       // Agregar los datos
-      for (const obj of value) {
-        dataBar.series[obj.dia].push(obj.cantidad);
-      }
+      value.split(";").forEach((el, idx) => {
+        dataBar.series[idx].push(el);
+      });
     }
 
-    return (
-      <Col key={`Col${key}`} md={12}>
+    return (      
+      <Col key={`Col${consulta.key}`} md={12}>
         <Card
-          id={`rf1Zona${key}`}
-          title={`Zona #${key}`}
-          category={`Vehiculos que salieron de la zona: ${value}`}
-          stats="Top de salida de vehiculos por zonas en NYC"
+          id={`rf1Zona${consulta.key}`}
+          title={`Temporada`}
+          category={`Analisis de demanda por temporada de los vehiculos`}
+          stats="Analisis de temporada de solicitud de vehiculos en NYC"
           statsIcon="fa fa-check"
           content={
             <div className="ct-chart">
@@ -443,12 +417,10 @@ class RF1 extends Component {
         <Grid fluid>
           <Row>
             <Col>{this.renderControlPanel()}</Col>
-            {this.state.consultas.map((req) => this.renderBarGraph(req))}
+            {this.state.consultas ? this.renderBarGraph(this.state.consultas) : null}
           </Row>
           <Row>
-            {this.state.consultas.map((table, key) =>
-              this.renderTable(table, key)
-            )}
+            {this.state.consultas ? this.renderTable(this.state.consultas) : null}
           </Row>
         </Grid>
       </div>
@@ -456,4 +428,4 @@ class RF1 extends Component {
   }
 }
 
-export default RF1;
+export default RA2;
