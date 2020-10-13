@@ -273,36 +273,48 @@ class RA2 extends Component {
    */
 
   selectData = () => {    
-    let date = "";
+    let date1 = "";
+    let date2 = "";
     switch (this.state.selectedId) {
       case 1:
-        date = "2019-01-01 00:00:00"
+        date1 = "2019-01-01 00:00:00";
+        date2 = "2019-01-01 23:59:59";
         break;
       case 2:
-        date = "2019-02-14 00:00:00"
+        date1 = "2019-02-14 00:00:00";
+        date2 = "2019-02-14 23:59:00";
         break;
       case 3:
-        date = "2019-02-17 00:00:00"
+        date1 = "2019-02-17 00:00:00";
+        date2 = "2019-02-17 23:59:00";
         break;
       case 4:
-        date = "2019-07-04 00:00:00"
+        date1 = "2019-07-04 00:00:00";
+        date2 = "2019-07-04 23:59:00";
         break;
       case 5:
-        date = "2019-09-07 00:00:00"
+        date1 = "2019-09-07 00:00:00";
+        date2 = "2019-09-07 23:59:00";
         break;
       case 6:
-        date = "2019-10-31 00:00:00"
+        date1 = "2019-10-31 00:00:00";
+        date2 = "2019-10-31 23:59:00";
         break;
       case 7:
-        date = "2019-11-26 00:00:00"
+        date1 = "2019-11-26 00:00:00";
+        date2 = "2019-11-26 23:59:00";
         break;
       case 8:
-        date = "2019-12-24 00:00:00"
+        date1 = "2019-12-24 00:00:00";
+        date2 = "2019-12-24 23:59:00";
         break;      
       default:
         break;
     }
-    return date;
+    return {
+      fechaInicio: date1,
+      fechaFin: date2
+    };
   };
 
   /**
@@ -316,10 +328,7 @@ class RA2 extends Component {
     }
     else {
       //Ejecutar la consulta
-      const body = {
-        fechaInicio: this.selectData(),
-        fechaFin: this.selectData(),
-      };      
+      const body = this.selectData();
 
       executeRa2(body)
         .then((res) => {
