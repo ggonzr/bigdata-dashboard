@@ -82,8 +82,7 @@ class RA2 extends Component {
 
   componentDidMount() {
     this.setState({
-      ...this.state,
-      consultas: this.mockedData,
+      ...this.state,      
       _notificationSystem: this.refs.notificationSystem
     });
   };
@@ -318,10 +317,9 @@ class RA2 extends Component {
     else {
       //Ejecutar la consulta
       const body = {
-        fecha: this.selectData()
-      };
-
-      return console.log("Validado", body);
+        fechaInicio: this.selectData(),
+        fechaFin: this.selectData(),
+      };      
 
       executeRa2(body)
         .then((res) => {

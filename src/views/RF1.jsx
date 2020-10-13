@@ -81,8 +81,7 @@ class RF1 extends Component {
 
   componentDidMount() {
     this.setState({
-      ...this.state,
-      consultas: this.groupDataRf1(this.mockedData),
+      ...this.state,      
       _notificationSystem: this.refs.notificationSystem
     });
   }
@@ -286,7 +285,7 @@ class RF1 extends Component {
     } else if (hora_final.length === 0 || hora_final.split(":").length !== 3) {
       this.notify("Por favor ingrese adecuadamente la hora");
     } else {
-      return console.log("Validado");
+      console.log("Validado");
       let body = {
         horaInicio: hora_inicial,
         horaFin: hora_final,

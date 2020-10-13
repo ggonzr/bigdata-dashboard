@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const host = "http://ec2-54-234-44-198.compute-1.amazonaws.com:24009/";
+const host = "http://34.121.228.62:24009/";
 const rf2 = host + "bigdata07/execute/rf2";
 const rf1 = host + "bigdata07/execute/rf1";
 const ra2 = host + "bigdata07/execute/ra2";
