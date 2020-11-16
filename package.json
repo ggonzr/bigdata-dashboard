@@ -17,7 +17,8 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.3",
-    "react-toggle": "4.0.2"
+    "react-toggle": "4.0.2",
+    "react-twitter-embed": "^3.0.3"
   },
   "devDependencies": {
     "@types/googlemaps": "3.30.19",
