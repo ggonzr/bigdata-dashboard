@@ -17,11 +17,6 @@
 */
 import UserProfile from "views/UserProfile.jsx";
 import AnalisisViolencia from "views/AnalisisViolencia.jsx";
-import Maps from "views/Maps.jsx";
-import RF2 from "views/RF2.jsx";
-import RF1 from "views/RF1.jsx";
-import RA2 from "views/RA2.jsx";
-import RA1_1 from "views/RA1_1.jsx";
 
 const dashboardRoutes = [
   {
@@ -29,41 +24,6 @@ const dashboardRoutes = [
     name: "Analisis de violencia en Colombia",
     icon: "pe-7s-close-circle",
     component: AnalisisViolencia,
-    layout: "/admin",
-  },
-  {
-    path: "/rf1",
-    name: "Req. Funcional 1",
-    icon: "pe-7s-cloud-upload",
-    component: RF1,
-    layout: "/admin",
-  },
-  {
-    path: "/rf2",
-    name: "Req. Funcional 2",
-    icon: "pe-7s-graph3",
-    component: RF2,
-    layout: "/admin",
-  },
-  {
-    path: "/ra1_1",
-    name: "Req. Analisis 1 - Pregunta 1",
-    icon: "pe-7s-cash",
-    component: RA1_1,
-    layout: "/admin",
-  },
-  {
-    path: "/ra2",
-    name: "Req. Analisis 2",
-    icon: "pe-7s-piggy",
-    component: RA2,
-    layout: "/admin",
-  },
-  {
-    path: "/maps",
-    name: "Maps",
-    icon: "pe-7s-map-marker",
-    component: Maps,
     layout: "/admin",
   },
   {

@@ -30,10 +30,13 @@ import {
 } from "react-bootstrap";
 import { Card } from "components/Card/Card.jsx";
 import { style } from "variables/Variables.jsx";
-import { executeRf1, retrieveData } from "services/backend";
+import { execute_predict, retrieveData } from "services/backend";
 import NotificationSystem from "react-notification-system";
 import { violenceHashtags } from "info/hashtags";
-import Tweet from "components/Tweet/tweet.jsx";
+import dataset from "assets/img/model/dataset.png";
+import matrix from "assets/img/model/matrix.png";
+import acc from "assets/img/model/acc.png";
+
 
 class AnalisisViolencia extends Component {
   constructor(props) {
@@ -63,25 +66,27 @@ class AnalisisViolencia extends Component {
    */
 
   submitQuery = () => {
-    const { hora_inicial, hora_final } = this.state;
-    if (hora_inicial.length === 0 || hora_inicial.split(":").length !== 3) {
-      this.notify("Por favor ingrese adecuadamente la hora");
-    } else if (hora_final.length === 0 || hora_final.split(":").length !== 3) {
-      this.notify("Por favor ingrese adecuadamente la hora");
-    } else {
+    const { hora_inicial } = this.state;
+    if (hora_inicial === undefined) {
+      this.notify("Por favor ingrese la frase a analizar");    
+    } 
+    else if (hora_inicial.length === 0) {
+      this.notify("Por favor ingrese la frase a analizar");    
+    }
+    else {
       console.log("Validado");
       let body = {
-        horaInicio: hora_inicial,
-        horaFin: hora_final,
+        text: hora_inicial,        
       };
 
       //Ejecutar la consulta
-      executeRf1(body)
+      execute_predict(body)
         .then((res) => {
-          const { request } = this.state;
-          request.push(res.data);
+          const { request } = this.state;          
           this.notify(
-            `Se ha creado la nueva consulta con el ID: ${res.data.id}`
+            `Clasificacion: ${res.data.label} \n
+             Puntaje: ${res.data.score}
+            `
           );
           this.setState({
             ...this.state,
@@ -146,7 +151,7 @@ class AnalisisViolencia extends Component {
                       <ControlLabel>Texto a analizar</ControlLabel>
                       <FormControl
                         type="text"
-                        placeholder="Hora Inicial"
+                        placeholder="Por favor escriba una frase para predecir"
                         onChange={(ev) =>
                           this.setState({
                             ...this.state,
@@ -155,7 +160,7 @@ class AnalisisViolencia extends Component {
                         }
                       />
                       <FormControl.Feedback />
-                      <HelpBlock>HH:mm:ss</HelpBlock>
+                      <HelpBlock>Por favor escriba una frase para predecir</HelpBlock>
                     </FormGroup>
                   </form>
                 </Col>
@@ -171,18 +176,7 @@ class AnalisisViolencia extends Component {
                   >
                     Crear consulta
                   </Button>
-                </Col>
-                <Col md={6}>
-                  <Button
-                    bsStyle="warning"
-                    onClick={(ev) => {
-                      ev.preventDefault();
-                      this.retrieveRequest();
-                    }}
-                  >
-                    Recuperar consulta
-                  </Button>
-                </Col>
+                </Col>                
               </Row>
             </Grid>
           </div>
@@ -219,30 +213,100 @@ class AnalisisViolencia extends Component {
 
   renderTweets = () => {
     return (
-      <Col md={3}>
-        <Tweet title="Title A" text="Prueba" />
-      </Col>
+      <Card
+        statsIcon="fa fa-cog"
+        title="Panel de control"
+        category="Ingrese la frase a análizar"
+        stats="Analisis basico de sentimientos"
+        content={
+          <div className="content">
+            <Grid fluid>
+              <Row>
+                <Col md={12}>
+                  <form>
+                    <FormGroup
+                      controlId="formBasicText"
+                      validationState={() => {
+                        return this.state.hora_inicial.length > 0
+                      }}
+                    >
+                      <ControlLabel>Texto a analizar</ControlLabel>
+                      <FormControl
+                        type="text"
+                        placeholder="Por favor escriba una frase para predecir"
+                        onChange={(ev) =>
+                          this.setState({
+                            ...this.state,
+                            hora_inicial: ev.target.value,
+                          })
+                        }
+                      />
+                      <FormControl.Feedback />
+                      <HelpBlock>Por favor escriba una frase para predecir</HelpBlock>
+                    </FormGroup>
+                  </form>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6}>
+                  <Button
+                    bsStyle="success"
+                    onClick={(ev) => {
+                      ev.preventDefault();
+                      this.submitQuery();
+                    }}
+                  >
+                    Crear consulta
+                  </Button>
+                </Col>                
+              </Row>
+            </Grid>
+          </div>
+        }
+      />
     );
   };
 
   renderMetrics = () => {
     return (
-      <Col md={4}>
+      <Col md={12}>
         <Card
           statsIcon="fa fa-cog"
-          title="Hashtags analizados"
-          category="Hashtags seleccionados para entrenar el modelo"
+          title="Dataset del modelo final"
+          category="Etiquetas negativa y positiva para prediccion"
           stats="Analisis basico de sentimientos"
           content={
             <img
-              src="https://estaticos.miarevista.es/media/cache/1140x_thumb/uploads/images/gallery/59144d795cafe812663c986a/razonescomermanzana-int.jpg"
-              alt="metricas-modelo"
-              height="100"
-              width="100"
+              src={dataset}
+              alt="metricas-modelo"              
             />
           }
         />
-      </Col>
+        <Card
+          statsIcon="fa fa-cog"
+          title="Precision de los conjuntos de entrenamiento y validacion"
+          category="Metricas de evaluacion"
+          stats="Analisis basico de sentimientos"
+          content={
+            <img
+              src={acc}
+              alt="metricas-modelo"              
+            />
+          }
+        />
+        <Card
+          statsIcon="fa fa-cog"
+          title="Precision de los conjuntos de entrenamiento y validacion"
+          category="Metricas de evaluacion"
+          stats="Analisis basico de sentimientos"
+          content={
+            <img
+              src={matrix}
+              alt="metricas-modelo"              
+            />
+          }
+        />
+      </Col>      
     );
   };
 
@@ -251,6 +315,11 @@ class AnalisisViolencia extends Component {
       <div className="content">
         <NotificationSystem ref="notificationSystem" style={style} />
         <Grid fluid>
+          <Row>
+            <p>Visualizacion: Apache Superset</p>
+            <a href="http://mine4102-7.virtual.uniandes.edu.co:5000/" target="_blank">Dashboard</a>
+            <p>Usuario y clave: grupo07</p>
+          </Row>
           <Row>
             <Col>{this.renderHashtags()}</Col>
           </Row>
