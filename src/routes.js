@@ -20,9 +20,9 @@ import AnalisisViolencia from "views/AnalisisViolencia.jsx";
 
 const dashboardRoutes = [
   {
-    path: "/violencia",
-    name: "Analisis de violencia en Colombia",
-    icon: "pe-7s-close-circle",
+    path: "/analisis",
+    name: "Analisis Semantico e Indexacion",
+    icon: "pe-7s-info",
     component: AnalisisViolencia,
     layout: "/admin",
   },

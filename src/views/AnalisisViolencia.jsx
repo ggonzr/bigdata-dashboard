@@ -33,7 +33,7 @@ import { style } from "variables/Variables.jsx";
 import { execute_predict, retrieveData } from "services/backend";
 import NotificationSystem from "react-notification-system";
 import { violenceHashtags } from "info/hashtags";
-import dataset from "assets/img/model/dataset.png";
+import dataset from "assets/img/elastic/kibana.png";
 import matrix from "assets/img/model/matrix.png";
 import acc from "assets/img/model/acc.png";
 
@@ -189,20 +189,32 @@ class AnalisisViolencia extends Component {
     return (
       <Card
         statsIcon="fa fa-cog"
-        title="Hashtags analizados"
-        category="Hashtags seleccionados para entrenar el modelo"
-        stats="Analisis basico de sentimientos"
+        title="Dashboard de resultados"
+        category="Credenciales de acceso"
+        stats="Analisis Semantico"
         content={
           <div className="content">
             <Grid fluid>
               <Row>
-                {violenceHashtags.map((el, idx) => {
-                  return (
-                    <Col key={idx} md={2}>
-                      {el}
-                    </Col>
-                  );
-                })}
+                <p>
+                  Por favor acceda al siguiente enlace para acceder
+                  a ElasticSearch
+                </p>
+                <a 
+                  href="https://cloud.elastic.co/login?redirectTo=%2Fhome"
+                  target="_blank"
+                >
+                  Inicio de sesión ElasticSearch
+                </a>
+                <h2>
+                  Credenciales de acceso
+                </h2>
+                <p>
+                  Por favor utilice la opción de inicio de sesión con Google
+                  e ingrese con la siguiente cuenta.
+                </p>
+                <p><b>Correo: </b> bigdata07.uniandes.2020@gmail.com</p>
+                <p><b>Clave: </b> $BigData07$</p>
               </Row>
             </Grid>
           </div>
@@ -269,43 +281,33 @@ class AnalisisViolencia extends Component {
 
   renderMetrics = () => {
     return (
-      <Col md={12}>
+      <Col md={12}>        
         <Card
           statsIcon="fa fa-cog"
-          title="Dataset del modelo final"
-          category="Etiquetas negativa y positiva para prediccion"
-          stats="Analisis basico de sentimientos"
+          title="Visualizaciones disponibles"
+          category="Acceso e interacción con las visualizaciones"
+          stats="Analisis Semantico"
           content={
+            <div className="content">
+            <p>
+              Se deja disponible un tablero de control el cual permite
+              visualizar las preguntas realizadas e interactuar dinamicamente
+              con la consulta que se desee realizar. Asimismo en la sección de grafos
+              está disponible una visualización con los aportes de los usuarios mas experimentados
+              con respecto a los temas que el usuario seleccione dinamicamente.
+
+              Para acceder a ellos acceda a <b>Kibana</b> y seleccione la opción <b>Dashboard </b> 
+              o <b>Graph</b> respectivamente.
+            </p>
             <img
               src={dataset}
               alt="metricas-modelo"              
+              height="100%"
+              width="100%"
             />
+            </div>
           }
-        />
-        <Card
-          statsIcon="fa fa-cog"
-          title="Precision de los conjuntos de entrenamiento y validacion"
-          category="Metricas de evaluacion"
-          stats="Analisis basico de sentimientos"
-          content={
-            <img
-              src={acc}
-              alt="metricas-modelo"              
-            />
-          }
-        />
-        <Card
-          statsIcon="fa fa-cog"
-          title="Precision de los conjuntos de entrenamiento y validacion"
-          category="Metricas de evaluacion"
-          stats="Analisis basico de sentimientos"
-          content={
-            <img
-              src={matrix}
-              alt="metricas-modelo"              
-            />
-          }
-        />
+        />        
       </Col>      
     );
   };
@@ -314,16 +316,10 @@ class AnalisisViolencia extends Component {
     return (
       <div className="content">
         <NotificationSystem ref="notificationSystem" style={style} />
-        <Grid fluid>
-          <Row>
-            <p>Visualizacion: Apache Superset</p>
-            <a href="http://mine4102-7.virtual.uniandes.edu.co:5000/" target="_blank">Dashboard</a>
-            <p>Usuario y clave: grupo07</p>
-          </Row>
+        <Grid fluid>          
           <Row>
             <Col>{this.renderHashtags()}</Col>
-          </Row>
-          <Row>{this.renderTweets()}</Row>
+          </Row>          
           <Row>{this.renderMetrics()}</Row>
         </Grid>
       </div>
